@@ -6,12 +6,19 @@
 #include "GameFramework/PlayerController.h"
 #include "MPPlayerController.generated.h"
 
-/**
- * 
- */
+// Forward Declarations
+class UInputMappingContext;
+
 UCLASS()
 class MYPROJECT_API AMPPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+
+protected:
+
+	virtual void BeginPlay() override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputMappingContext> MovementContext;
 	
 };
