@@ -11,5 +11,6 @@ void AMPPlayerController::BeginPlay()
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(MovementContext, 0);
+		Subsystem->AddMappingContext(InteractionContext, 1);
 	}
 }

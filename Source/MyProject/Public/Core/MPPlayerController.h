@@ -9,6 +9,7 @@
 // Forward Declarations
 class UInputMappingContext;
 
+
 UCLASS()
 class MYPROJECT_API AMPPlayerController : public APlayerController
 {
@@ -20,5 +21,7 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputMappingContext> MovementContext;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputMappingContext> InteractionContext;
 	
 };
