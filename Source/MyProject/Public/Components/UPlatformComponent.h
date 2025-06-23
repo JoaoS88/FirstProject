@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "PlatformComponent.generated.h"
+#include "UPlatformComponent.generated.h"
 
 UENUM(BlueprintType)
 enum class EActivationMode : uint8

@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "Components/PlatformComponent.h"
+#include "Components/UPlatformComponent.h"
 #include "GameFramework/Character.h"
-#include "Interfaces/PlatformActivatableInterface.h"
+#include "Interfaces/IActivatesPlatform.h"
 
 // Sets default values for this component's properties
 UPlatformComponent::UPlatformComponent()
@@ -170,7 +170,7 @@ void UPlatformComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent
     if (!OtherActor) return;
 
     // Check if the overlapping actor implements the interface
-    if (OtherActor->GetClass()->ImplementsInterface(UPlatformActivatableInterface::StaticClass()))
+    if (OtherActor->GetClass()->ImplementsInterface(UIActivatesPlatform::StaticClass()))
     {
         OverlapCount++;
         if (ActivationMode == EActivationMode::Trap)
@@ -184,7 +184,7 @@ void UPlatformComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComponent, 
 {
     if (!OtherActor) return;
 
-    if (OtherActor->GetClass()->ImplementsInterface(UPlatformActivatableInterface::StaticClass()))
+    if (OtherActor->GetClass()->ImplementsInterface(UIActivatesPlatform::StaticClass()))
     {
         // Only decrement if it was previously counted
         if (OverlapCount > 0)

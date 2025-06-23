@@ -4,7 +4,7 @@
 #include "Actors/MPPlatform.h"
 #include "Components/BoxComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Components/PlatformComponent.h"
+#include "Components/UPlatformComponent.h"
 
 // Sets default values
 AMPPlatform::AMPPlatform()

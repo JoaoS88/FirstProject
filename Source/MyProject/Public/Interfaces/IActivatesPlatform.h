@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "PlatformActivatableInterface.generated.h"
+#include "IActivatesPlatform.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UPlatformActivatableInterface : public UInterface
+class UIActivatesPlatform : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,7 +16,7 @@ class UPlatformActivatableInterface : public UInterface
 /**
  * 
  */
-class MYPROJECT_API IPlatformActivatableInterface
+class MYPROJECT_API IIActivatesPlatform
 {
 	GENERATED_BODY()
 

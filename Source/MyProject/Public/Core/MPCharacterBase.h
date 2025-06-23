@@ -14,6 +14,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class UCapsuleComponent;
 class UPhysicsHandleComponent;
+class UGrabComponent;
 
 UCLASS()
 class MYPROJECT_API AMPCharacterBase : public ACharacter
@@ -55,8 +56,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> ThrowAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	TObjectPtr<UInputAction> InteractAction;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> FreezeObjectAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AdjustDistanceAction;
@@ -80,7 +79,7 @@ protected:
 
 	// --Interacting--
 	// ?could move this into character interaction component to control interaction - need to look at doing this?
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	float MaxGrabMass = 150.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	float MaxGrabDistance = 200.0f;
@@ -91,30 +90,25 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
 	float BaseThrowForce = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float RotationSpeed = 1.25f;
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	//float InteractionRange = 500.0f;
+	float RotationSpeed = 1.25f;*/
 	//
 
 	// --Functions--
 	// ---Movement---
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void RunStarted(const FInputActionValue& Value);
-	void RunEnded(const FInputActionValue& Value);
-	void CrouchStarted(const FInputActionValue& Value);
-	void CrouchEnded(const FInputActionValue& Value);
-	void JumpStarted(const FInputActionValue& Value);
-	void JumpEnded(const FInputActionValue& Value);
+	void RunStarted();
+	void RunEnded();
+	void CrouchStarted();
+	void CrouchEnded();
+	void JumpStarted();
+	void JumpEnded();
 	// ---Interaction---
-	void GrabStarted(const FInputActionValue& Value);
-	void GrabEnded(const FInputActionValue& Value);
-	void Throw(const FInputActionValue& Value);
-	void FreezeObject(const FInputActionValue& Value);
-	void InteractStarted(const FInputActionValue& Value);
-	void InteractEnded(const FInputActionValue& Value);
-	void AdjustDistance(const FInputActionValue& Value);
-	void RotateObject(float DeltaTime);
+	void GrabStarted();
+	void GrabEnded();
+	void ThrowObject();
+	void FreezeObject();
+	void AdjustObjectDistance(const FInputActionValue& Value);
 	
 	// ---Debug---
 	void DebugMessage(const FString& Message);
@@ -128,11 +122,9 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
-	// --Variables--
-	float CurrentHoldDistance = 0.f;
-	AActor* HeldObject = nullptr;
-	bool bIsInteracting = false;
-	FVector2D LastLookInput;
+
+private:
+
+	UGrabComponent* GrabComponent = nullptr;
 
 };
