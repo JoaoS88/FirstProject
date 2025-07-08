@@ -3,6 +3,8 @@
 #include "Components/UGrabComponent.h"
 #include "Camera/CameraComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+
+#include "Components/UDetectionComponent.h"
 #include "Components/UGrabbableComponent.h"
 
 
@@ -30,7 +32,15 @@ void UGrabComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CameraComponent missing on %s"), *GetOwner()->GetName());
 	}
-	
+	DetectionComponent = GetOwner()->FindComponentByClass<UUDetectionComponent>();
+	if (!DetectionComponent)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("DetectionComponent missing on %s"), *GetOwner()->GetName());
+	}
+	else
+	{
+		DetectionComponent->OnVisionDetected.AddDynamic(this, &UGrabComponent::HandleVisionDetection);
+	}
 }
 
 // Called every frame
@@ -96,28 +106,37 @@ bool UGrabComponent::GrabIfValid(const FHitResult& HitResult)
 
 	return true;
 }
-void UGrabComponent::TryGrabObject()
+void UGrabComponent::HandleVisionDetection(const FVisionDetectionInfo& DetectionInfo)
 {
-	if (!IsReadyForGrab()) return;
+	if (!DetectionInfo.bLineTraceHit || DetectionInfo.ValidComponents.Num() == 0) return;
+		
+	for (UActorComponent* Comp : DetectionInfo.ValidComponents)
+	{
+		if (UUGrabbableComponent* Grabbable = Cast<UUGrabbableComponent>(Comp))
+		{
+			// Check if ready to grab before grabbing
+			if (!IsReadyForGrab())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("GrabComponent not ready when detection event received"));
+				return;
+			}
 
-	// Line trace parameters
-	FVector Start = Camera->GetComponentLocation();
-	FVector End = Start + (Camera->GetForwardVector() * MaxGrabDistance);
+			// Grab if ready
+			TryGrabObject(DetectionInfo);
+			return;
+		}
+	}
+}
+void UGrabComponent::TryGrabObject(const FVisionDetectionInfo& DetectionInfo)
+{
+	if (!DetectionInfo.bLineTraceHit) return;
 
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(GetOwner());
+	const FHitResult& HitResult = DetectionInfo.HitResult;
 
-	// Perform line trace
-	FHitResult HitResult;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_PhysicsBody, Params);
-	
-	if (bHit && !GrabIfValid(HitResult))
+	if (!GrabIfValid(HitResult))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Hit actor is not grabbable or too heavy."));
 	}
-
-	// If debug on then show line trace debug line
-	DrawDebugTrace(Start, End, HitResult);
 }
 void UGrabComponent::ReleaseObject(bool bFreeze)
 {

@@ -6,8 +6,14 @@
 #include "Components/ActorComponent.h"
 #include "UGrabComponent.generated.h"
 
+// Forward Declaration
+// Character
 class UCameraComponent;
 class UPhysicsHandleComponent;
+// Detection
+class UUDetectionComponent;
+struct FVisionDetectionInfo;
+// Grabbable Actor
 class UUGrabbableComponent;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -28,19 +34,22 @@ public:
 
 	// Functionality
 	// (currently not exposed, but possibly in future if needed to use in blueprints for ui, could do)
-	void TryGrabObject();
+	void TryGrabObject(const FVisionDetectionInfo& DetectionInfo);
 	void ReleaseObject(bool bFreeze = false);
 	void ThrowObject();
 	void AdjustObjectDistance(float ScrollDelta);
+	UFUNCTION()
+	void HandleVisionDetection(const FVisionDetectionInfo& VisionDetection);
 
 private:
 
 	// Component References
 	UPROPERTY()
 	TObjectPtr<UPhysicsHandleComponent> PhysicsHandle;
-
 	UPROPERTY()
 	TObjectPtr<UCameraComponent> Camera;
+	UPROPERTY()
+	TObjectPtr<UUDetectionComponent> DetectionComponent;
 
 	// Cached Object References
 	UPROPERTY()

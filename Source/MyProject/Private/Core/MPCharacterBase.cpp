@@ -3,9 +3,12 @@
 #include "Core/MPCharacterBase.h"
 #include "EnhancedInputComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/UDetectionComponent.h"
 #include "Components/UGrabComponent.h"
+#include "Components/InteractComponent.h"
 
 #include "GameFramework/SpringArmComponent.h"
+#include "Components/SphereComponent.h"
 #include "Camera/CameraComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 
@@ -24,10 +27,12 @@ AMPCharacterBase::AMPCharacterBase()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 	Camera->bUsePawnControlRotation = true;
-	// PhysicsHandle - interacting
+	// PhysicsHandle - grabbing
 	PhysicsHandle = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("PhysicsHandle"));
-	// GrabComponent - interacting
+	// GrabComponent - grabbing
 	GrabComponent = CreateDefaultSubobject<UGrabComponent>(TEXT("GrabComponent"));
+	// InteractComponent - interacting
+	InteractComponent = CreateDefaultSubobject<UInteractComponent>(TEXT("InteractComponent"));
 }
 
 // Called when the game starts or when spawned
@@ -36,7 +41,36 @@ void AMPCharacterBase::BeginPlay()
 	Super::BeginPlay();
 
 	BaseWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
+	DetectionComponent = FindComponentByClass<UUDetectionComponent>();
+	if (!DetectionComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("DetectionComponent NOT found on %s"), *GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("DetectionComponent found."));
+	}
+
 	GrabComponent = FindComponentByClass<UGrabComponent>();
+	if (!GrabComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("GrabComponent NOT found on %s"), *GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("GrabComponent found."));
+	}
+
+	InteractComponent = FindComponentByClass<UInteractComponent>();
+	if (!InteractComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("InteractComponent NOT found on %s"), *GetName());
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("InteractComponent found."));
+	}
 
 }
 
@@ -63,12 +97,15 @@ void AMPCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMPCharacterBase::JumpStarted);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AMPCharacterBase::JumpEnded);
 
-		// --Interaction--
+		// --Grabbing--
 		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Started, this, &AMPCharacterBase::GrabStarted);
 		EnhancedInputComponent->BindAction(GrabAction, ETriggerEvent::Completed, this, &AMPCharacterBase::GrabEnded);
 		EnhancedInputComponent->BindAction(ThrowAction, ETriggerEvent::Triggered, this, &AMPCharacterBase::ThrowObject);
 		EnhancedInputComponent->BindAction(FreezeObjectAction, ETriggerEvent::Triggered, this, &AMPCharacterBase::FreezeObject);
 		EnhancedInputComponent->BindAction(AdjustDistanceAction, ETriggerEvent::Triggered, this, &AMPCharacterBase::AdjustObjectDistance);
+	
+		// --Interacting--
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AMPCharacterBase::Interact);
 	}
 }
 
@@ -136,7 +173,7 @@ void AMPCharacterBase::JumpEnded()
 	DebugMessage(TEXT("State: Jumping Ended"));
 }
 
-// --Interaction--
+// --Grab--
 void AMPCharacterBase::GrabStarted()
 {
 	/*// Hit Result from Line trace
@@ -194,10 +231,14 @@ void AMPCharacterBase::GrabStarted()
 			DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 10.0f, 12, FColor::Red, false, 1.0f);
 		}
 	}*/
-	if (!GrabComponent) return;
+	if (!GrabComponent ) return;
 
 	// grab object
-	GrabComponent->TryGrabObject();
+	FVisionDetectionInfo VisionInfo = DetectionComponent->PerformVisionDetection();
+	if (VisionInfo.bLineTraceHit)
+	{
+		GrabComponent->TryGrabObject(VisionInfo);
+	}
 	
 }
 void AMPCharacterBase::GrabEnded()
@@ -282,6 +323,19 @@ void AMPCharacterBase::AdjustObjectDistance(const FInputActionValue& Value)
 
 	GrabComponent->AdjustObjectDistance(AxisValue);
 	
+}
+
+// --Interact--
+void AMPCharacterBase::Interact()
+{
+	if (!InteractComponent) return;
+
+	// interact with object
+	FVisionDetectionInfo VisionInfo = DetectionComponent->PerformVisionDetection();
+	if (VisionInfo.bLineTraceHit)
+	{
+		InteractComponent->TryInteract(VisionInfo);
+	}
 }
 
 // --Debug--

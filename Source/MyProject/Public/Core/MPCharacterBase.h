@@ -8,13 +8,19 @@
 
 struct FInputActionValue;
 // Forward Declarations
+// Input
 class UInputMappingContext;
 class UInputAction;
+// Character
 class UCameraComponent;
 class USpringArmComponent;
 class UCapsuleComponent;
+class USphereComponent;
 class UPhysicsHandleComponent;
+// Custom Components
 class UGrabComponent;
+class UUDetectionComponent;
+class UInteractComponent;
 
 UCLASS()
 class MYPROJECT_API AMPCharacterBase : public ACharacter
@@ -36,6 +42,8 @@ protected:
 	TObjectPtr<USpringArmComponent > SpringArm; // SpringArm
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Physics")
 	TObjectPtr<UPhysicsHandleComponent> PhysicsHandle; // PhysicsHandle
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<USphereComponent> ProximityVolume;
 	//
 	
 	// --Input--
@@ -50,7 +58,7 @@ protected:
 	TObjectPtr<UInputAction> JumpAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> CrouchAction;
-	// ---Interaction---
+	// ---Grab---
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> GrabAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
@@ -59,7 +67,9 @@ protected:
 	TObjectPtr<UInputAction> FreezeObjectAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UInputAction> AdjustDistanceAction;
-	//
+	// ---Interact---
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<UInputAction> InteractAction;
 	
 	// --Movement--
 	// ?could move this to the character movement component - need to look at how to do this?
@@ -77,22 +87,6 @@ protected:
 	float LookSensitivityY = 0.85f;
 	//
 
-	// --Interacting--
-	// ?could move this into character interaction component to control interaction - need to look at doing this?
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float MaxGrabMass = 150.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float MaxGrabDistance = 200.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float MinHoldDistance = 100.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float MaxHoldDistance = 300.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float BaseThrowForce = 500.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Interaction")
-	float RotationSpeed = 1.25f;*/
-	//
-
 	// --Functions--
 	// ---Movement---
 	void Move(const FInputActionValue& Value);
@@ -103,13 +97,15 @@ protected:
 	void CrouchEnded();
 	void JumpStarted();
 	void JumpEnded();
-	// ---Interaction---
+	// ---Grab---
 	void GrabStarted();
 	void GrabEnded();
 	void ThrowObject();
 	void FreezeObject();
 	void AdjustObjectDistance(const FInputActionValue& Value);
-	
+	// ---Interact---
+	void Interact();
+
 	// ---Debug---
 	void DebugMessage(const FString& Message);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Debug")
@@ -125,6 +121,8 @@ public:
 
 private:
 
-	UGrabComponent* GrabComponent = nullptr;
-
+	// Component References
+	TObjectPtr<UUDetectionComponent> DetectionComponent = nullptr;
+	TObjectPtr<UGrabComponent> GrabComponent = nullptr;
+	TObjectPtr<UInteractComponent> InteractComponent = nullptr;
 };
